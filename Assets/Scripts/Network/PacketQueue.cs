@@ -20,7 +20,7 @@ public class PacketQueue
     {
         lock (_lock)
         {
-            Debug.LogFormat("protocolID: {0}, payload: {1}", id, payload);
+            //Debug.LogFormat("protocolID: {0}, payload: {1}", id, payload);
             PacketMessage message = new PacketMessage();
             message.Id = id;
             message.Payload = payload;
