@@ -17,14 +17,14 @@ public class RemotePlayer : MonoBehaviour
     Vector3 targetPos;
     Quaternion targetRot;
     float lerpSpeed = 10f;
-    Animator animator;
+    //Animator animator;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         targetPos = transform.position;
         targetRot = transform.rotation;
-        animator = GetComponentInChildren<Animator>();
+        //animator = GetComponentInChildren<Animator>();
         controller = GetComponent<CharacterController>();
     }
 
@@ -41,7 +41,7 @@ public class RemotePlayer : MonoBehaviour
         if(controller.isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            animator.SetBool("IsGrounded", false);
+            //animator.SetBool("IsGrounded", false);
         }
     }
 
@@ -77,12 +77,12 @@ public class RemotePlayer : MonoBehaviour
 
         controller.Move(delta);
 
-        animator.SetFloat("speed", distance > 0.1f ? speed : 0);
+        //animator.SetFloat("speed", distance > 0.1f ? speed : 0);
 
-        if (controller.isGrounded && animator.GetBool("IsGrounded") == false)
-        {
-            animator.SetBool("IsGrounded", controller.isGrounded);
-        }
+        //if (controller.isGrounded && animator.GetBool("IsGrounded") == false)
+        //{
+        //    animator.SetBool("IsGrounded", controller.isGrounded);
+        //}
 
         
     }

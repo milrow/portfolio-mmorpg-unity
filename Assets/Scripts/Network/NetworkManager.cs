@@ -130,20 +130,15 @@ public class NetworkManager : MonoBehaviour
 
                 if (_recvBuffer.DataSize < packetSize) break;
 
-                //Debug.Log($"[Recv] Size: {packetSize}, ID: {protocolId}");
-                //string raw = "";
-                //for (int i = 0; i < 10; i++) raw += buffer[offset + i].ToString("X2") + " ";
-                //Debug.Log($"[Raw Hex]: {raw}");
-
                 byte[] payload = new byte[packetSize - 4];
                 Array.Copy(_recvBuffer.readSegment.Array, offset + 4, payload, 0, packetSize - 4);
 
                 PacketQueue.Instance.Push(protocolId, payload);
-                Debug.Log($"protocolId: {protocolId}, size: {packetSize}, offset: { offset}");
+                //Debug.Log($"protocolId: {protocolId}, size: {packetSize}, offset: { offset}");
 
-                Debug.Log($"[before Read] Previous DataSize: {_recvBuffer.DataSize}");
+                //Debug.Log($"[before Read] Previous DataSize: {_recvBuffer.DataSize}");
                 _recvBuffer.OnRead(packetSize);
-                Debug.Log($"[After Read] Remaining DataSize: {_recvBuffer.DataSize}");
+                //Debug.Log($"[After Read] Remaining DataSize: {_recvBuffer.DataSize}");
             }
             _recvBuffer.Clean();
             RegistRecieve();

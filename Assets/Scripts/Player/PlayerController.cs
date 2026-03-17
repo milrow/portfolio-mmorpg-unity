@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using Google.Protobuf.Protocol;
+using UnityEngine.EventSystems;
 
 enum PlayerActionEnum
 {
@@ -47,7 +48,7 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         cameraTransform = GameObject.Find("ThirdPersonCamera").GetComponent<Transform>();
-        
+
     }
 
     public void SetCamera()
@@ -78,76 +79,60 @@ public class PlayerController : MonoBehaviour
         if (context.performed)
         {
             //StartCoroutine(Attacking());
-            
+
         }
     }
 
-    private IEnumerator Attacking() 
+    private IEnumerator Attacking()
     {
         combo++;
-        
+
         yield return new WaitForSeconds(1f);
         combo = 0;
     }
 
     private void Update()
     {
-        if(cameraTransform == null)
+        if (cameraTransform == null)
         {
             return;
         }
 
-        
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right = cameraTransform.right;
+
+        forward.y = 0;
+        right.y = 0;
+
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 moveDirection = (forward * moveInput.y + right * moveInput.x).normalized;
+        Vector3 delta = moveDirection * speed;
+
+        //rotation
+        if (shouldFaceMoveDirection && moveDirection.sqrMagnitude > 0.001f)
         {
-            Vector3 forward = cameraTransform.forward;
-            Vector3 right = cameraTransform.right;
-
-            forward.y = 0;
-            right.y = 0;
-
-            forward.Normalize();
-            right.Normalize();
-
-            Vector3 moveDirection = (forward * moveInput.y + right * moveInput.x).normalized;
-
-            Vector3 delta = moveDirection * speed;
-
-            animator.SetFloat("speed", moveDirection.sqrMagnitude * speed * Time.deltaTime);
-
-            if (moveDirection.sqrMagnitude > 0)
-            {
-                // 일정 시간이 지났을 때만 패킷 전송
-                if (Time.time - _lastSendTime > sendInterval)
-                {
-                    SendMovePacket();
-                    _lastSendTime = Time.time;
-                }
-            }
-
-           
-
-            //카메라 시점에 따라 이동 방향 정함
-            if (shouldFaceMoveDirection && moveDirection.sqrMagnitude > 0.001f)
-            {
-                Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-                transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, 10f * Time.deltaTime);
-            }
-
-            //jump
-            velocity.y += gravity * Time.deltaTime;
-            delta.y = velocity.y;
-            controller.Move(delta * Time.deltaTime);
-
-            if (controller.isGrounded && animator.GetBool("IsGrounded") == false)
-            {
-                animator.SetBool("IsGrounded", controller.isGrounded);
-            }
+            Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, 10f * Time.deltaTime);
         }
-        
 
-        animator.SetInteger("Attack", combo);
+        //jump
+        velocity.y += gravity * Time.deltaTime;
+        delta.y = velocity.y;
+        controller.Move(delta * Time.deltaTime);
 
-        
+        HandleNetworkSync();
+        UpdateAnimations();
+    }
+
+    void HandleNetworkSync()
+    {
+        if (moveInput.sqrMagnitude > 0 && Time.time - _lastSendTime > sendInterval)
+        {
+            SendMovePacket();
+            _lastSendTime = Time.time;
+        }
     }
 
     void SendMovePacket()
@@ -165,5 +150,13 @@ public class PlayerController : MonoBehaviour
         C2S_Jump packet = new C2S_Jump();
         packet.SessionId = DataManager.Instance.MyUser.SessionID;
         NetworkManager.Instance.Send(packet, (ushort)ProtocolID.IdC2SJump);
+    }
+
+    void UpdateAnimations()
+    {
+        float horizontalSpeed = new Vector2(moveInput.x, moveInput.y).magnitude * speed;
+        animator.SetFloat("speed", horizontalSpeed);
+        animator.SetBool("IsGrounded", controller.isGrounded);
+        //animator.SetInteger("Attack", combo);
     }
 }
