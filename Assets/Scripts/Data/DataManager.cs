@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DataManager : MonoBehaviour
 {
@@ -12,16 +13,13 @@ public class DataManager : MonoBehaviour
 
     
     public UserInfo MyUser { get; set; }
+    public WorldCharacter MyCharacter { get; set; }
+    public List<CharacterInfo> CharacterList { get; set; } = new List<CharacterInfo>();
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void SetCharacterList(List<CharacterInfo> characterList)
     {
-        
+        CharacterList = characterList;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }

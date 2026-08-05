@@ -11,7 +11,7 @@ public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance { get; private set; }
 
-    public uint userId;
+    public uint accountId;
 
     private void Awake()
     {
@@ -39,38 +39,69 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    void HandlePacket(ushort id, byte[] payload)
+    void HandlePacket(ProtocolID id, byte[] payload)
     {
-        switch (id)
+        try
         {
-            case (ushort)ProtocolID.IdS2CBroadcastMove:
-                {
-                    S2C_BroadcastMove pkt = S2C_BroadcastMove.Parser.ParseFrom(payload);
-                    PacketHandler.Handle_S2C_BroadcastMove(pkt);
-                }
-                break;
-            case (ushort)ProtocolID.IdS2CLogin:
-                {
-                    S2C_Login pkt = S2C_Login.Parser.ParseFrom(payload);
-                    PacketHandler.Handle_S2C_Login(pkt);
-                }
-                break;
-            case (ushort)ProtocolID.IdS2CBroadcastJump:
-                {
-                    S2C_BroadcastJump pkt = S2C_BroadcastJump.Parser.ParseFrom(payload);
-                    PacketHandler.Handle_S2C_BroadcastJump(pkt);
-                }
-                break;
-            case (ushort)ProtocolID.IdS2CLeaveGame: 
-                {
-                    S2C_LeaveGame pkt = S2C_LeaveGame.Parser.ParseFrom(payload);
-                    PacketHandler.Handle_S2C_LeaveGame(pkt);
-                }
-                break;
-
-            default:
-                break;
+            switch (id)
+            {
+                case ProtocolID.IdS2CCreateAccount:
+                    {
+                        S2C_CreateAccount pkt = S2C_CreateAccount.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_CreateAccount(pkt);
+                    }
+                    break;
+                case ProtocolID.IdS2CBroadcastMove:
+                    {
+                        S2C_BroadcastMove pkt = S2C_BroadcastMove.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_BroadcastMove(pkt);
+                    }
+                    break;
+                case ProtocolID.IdS2CLogin:
+                    {
+                        S2C_Login pkt = S2C_Login.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_Login(pkt);
+                    }
+                    break;
+                case ProtocolID.IdS2CBroadcastJump:
+                    {
+                        S2C_BroadcastJump pkt = S2C_BroadcastJump.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_BroadcastJump(pkt);
+                    }
+                    break;
+                case ProtocolID.IdS2CLeaveGame:
+                    {
+                        S2C_LeaveGame pkt = S2C_LeaveGame.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_LeaveGame(pkt);
+                    }
+                    break;
+                case ProtocolID.IdS2CCharacterList:
+                    {
+                        S2C_CharacterList pkt = S2C_CharacterList.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_CharacterList(pkt);
+                    }
+                    break;
+                case ProtocolID.IdS2CCreateCharacter:
+                    {
+                        S2C_CreateCharacter pkt = S2C_CreateCharacter.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_CreateCharacter(pkt);
+                    }
+                    break;
+                    case ProtocolID.IdS2CEnterWorld:
+                    {
+                        S2C_EnterWorld pkt = S2C_EnterWorld.Parser.ParseFrom(payload);
+                        PacketHandler.Handle_S2C_EnterWorld(pkt);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
+
 
     }
 
@@ -86,14 +117,7 @@ public class NetworkManager : MonoBehaviour
         _socket.EndConnect(result);
         Debug.Log("Conneted");
 
-        //test용 임시 로그인 
-        C2S_Login packet = new C2S_Login();
-        packet.UserId = userId;
-        Instance.Send(packet, (ushort)ProtocolID.IdC2SLogin);
-        
         RegistRecieve();
-
-        
     }
 
     private void RegistRecieve()
@@ -149,8 +173,9 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    public void Send(IMessage packet, ushort protocolId)
+    public void Send(IMessage packet, ProtocolID _protocolId)
     {
+        ushort protocolId = (ushort)_protocolId;
         ushort dataSize = (ushort)packet.CalculateSize();
         ushort packetSize = (ushort)(dataSize + 4);
 
@@ -190,7 +215,7 @@ public class NetworkManager : MonoBehaviour
     {
         C2S_LeaveGame packet = new C2S_LeaveGame();
         packet.SessionId = DataManager.Instance.MyUser.SessionID;
-        Instance.Send(packet, (ushort)ProtocolID.IdC2SLeaveGame);
+        Instance.Send(packet, ProtocolID.IdC2SLeaveGame);
     }
 
     public bool isConnected = false;

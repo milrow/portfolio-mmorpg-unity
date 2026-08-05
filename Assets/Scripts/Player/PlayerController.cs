@@ -141,15 +141,14 @@ public class PlayerController : MonoBehaviour
         packet.PosX = transform.position.x;
         packet.PosY = transform.position.y;
         packet.PosZ = transform.position.z;
-        packet.SessionId = DataManager.Instance.MyUser.SessionID;
-        NetworkManager.Instance.Send(packet, (ushort)ProtocolID.IdC2SMove);
+        NetworkManager.Instance.Send(packet, ProtocolID.IdC2SMove);
     }
 
     void SendJumpPacket()
     {
         C2S_Jump packet = new C2S_Jump();
-        packet.SessionId = DataManager.Instance.MyUser.SessionID;
-        NetworkManager.Instance.Send(packet, (ushort)ProtocolID.IdC2SJump);
+        
+        NetworkManager.Instance.Send(packet, ProtocolID.IdC2SJump);
     }
 
     void UpdateAnimations()

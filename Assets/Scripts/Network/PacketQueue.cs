@@ -1,10 +1,11 @@
+using Google.Protobuf.Protocol;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
 
 public class PacketMessage
 {
-    public ushort Id;
+    public ProtocolID Id;
     public byte[] Payload;
 }
 
@@ -22,7 +23,7 @@ public class PacketQueue
         {
             //Debug.LogFormat("protocolID: {0}, payload: {1}", id, payload);
             PacketMessage message = new PacketMessage();
-            message.Id = id;
+            message.Id = (ProtocolID)id;
             message.Payload = payload;
             _queue.Enqueue(message);
         }

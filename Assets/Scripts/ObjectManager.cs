@@ -29,12 +29,12 @@ public class ObjectManager : MonoBehaviour
         
     }
 
-    public GameObject Spawn(uint sessionId, Vector3 spawnPos, bool isMyPlayer)
+    public GameObject Spawn(uint objectId, Vector3 spawnPos, bool isMyPlayer)
     {
         GameObject prefab = isMyPlayer ? PlayerPrefab : RemotePlayerPrefab;
         GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity);
 
-        objectPool.Add(sessionId, obj);
+        objectPool.Add(objectId, obj);
 
         if(isMyPlayer )
         {
@@ -73,10 +73,10 @@ public class ObjectManager : MonoBehaviour
         return;
     }
 
-    public GameObject Fine(uint sessionId)
+    public GameObject Fine(uint objectId)
     {
         GameObject obj;
-        objectPool.TryGetValue(sessionId, out obj);
+        objectPool.TryGetValue(objectId, out obj);
         return obj;
 
 
